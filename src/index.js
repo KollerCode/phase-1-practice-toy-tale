@@ -12,35 +12,109 @@ document.addEventListener("DOMContentLoaded", () => {
       toyFormContainer.style.display = "none";
     }
   });
+  toyFormContainer.addEventListener("submit", (event) => {
+    event.preventDefault();
+    createToy(event.target.name.value, event.target.image.value);
+  });
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  fetch('http://localhost:3000/toys')
-  .then(response => response.json())
-  .then(response => {
-    console.log(response)
-	    response.forEach((toy) => {
-        addToyInfo(toy)
+  fetch("http://localhost:3000/toys")
+    .then((response) => response.json())
+    .then(function (data) {
+      data.map(t => addToyInfo(t))
+    });
+});
+
+function addToyInfo(toy) {
+  let toyCollection = document.getElementById("toy-collection");
+  const toyCard = document.createElement('div')
+  toyCard.className = "card"
+  const toyName = document.createElement('h2')
+  toyName.innerText = toy.name
+  const toyImage = document.createElement('img')
+  toyImage.className = 'toy-avatar'
+  toyImage.src = toy.image
+  const toyLikes = document.createElement('p')
+  toyLikes.className="likes"
+  toyLikes.innerText = toy.likes + " Likes"
+  const likeButton = document.createElement('button')
+  likeButton.className = "like-btn"
+  likeButton.id = toy.id
+  likeButton.innerText = "Like ❤️";
+  toyCard.appendChild(toyName)
+  toyCard.appendChild(toyImage)
+  toyCard.appendChild(toyLikes)
+  toyCard.appendChild(likeButton)
+  toyCollection.appendChild(toyCard)
+
+  likeButton.addEventListener("click", (e) => {
+    e.preventDefault()
+    // if (e.target.className === "like-btn") {
+    //   let currentLikes = parseInt(e.target.previousElementSibling.innerText)
+    //   let newLikes =currentLikes + 1
+    // }
+    // increaseLikeButton(toy)
+  })
+}
+  
+function createToy(name, url) {
+  fetch("http://localhost:3000/toys", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      name: name,
+      image: url,
+      likes: 0,
     })
   })
-})
-
-function addToyInfo(toy){
-  let toyCollection = document.getElementById("toy-collection")
-  toyCollection.innerHTML += `
-  <div class ="card">
-    <h2>${toy.name}</h2>
-    <img src=${toy.image} class="toy-avatar" />
-    <p>${toy.likes} Likes</p>
-    <button class="like-btn" id=${toy.id}>Like ❤️</button>
-  </div>
-  `
-  console.log(toy)
+    .then((res) => res.json())
+    .then(function(data) {
+        console.log(data)
+    })
 }
-
-// // addEventListener('submit',____)so that when the form is submitted 
-// // the new toy is persisted to the database and a new card showing the 
-// // toy is added to the DOM
-// // addEventListener('click', likeToy) When the button is clicked 
-// // the number of likes should be updated in the database 
-// // and the updated information should be rendered to the dom
+document.getElementById("toy-collection").addEventListener("click", (e) => {
+  e.preventDefault()
+  if (e.target.className === "like-btn") {
+    let currentLikes = parseInt(e.target.previousElementSibling.innerText)
+    let newLikes = currentLikes + 1
+    e.target.previousElementSibling.innerText = newLikes + "likes"
+    fetch(`http://localhost:3000/toys/${e.target.dataset.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        "likes": newLikes,
+      }),
+    })
+  }
+  
+  // function increaseLikeButton(toy) {
+  //   console.log(toy.likes)
+  //   let newNumberOfLikes = toy.likes + 1;
+  //   let paragraph = document.querySelector(".likes")
+  //   // console.log(paragraph.innerText)
+  //   // console.log(newNumberOfLikes)
+  //   // console.log(toy.likes)
+  //   fetch(`http://localhost:3000/toys/${toy.id}`, {
+  //     method: "PATCH",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Accept: "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       "likes": newNumberOfLikes,
+  //     }),
+  //   })
+  //     .then((response) => response.json())
+  //     .then((response => {
+  //       // console.log(newNumberOfLikes)
+  //       paragraph.innerText = `${newNumberOfLikes} likes`;
+  //     }))
+  // }
+})
