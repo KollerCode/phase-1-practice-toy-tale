@@ -82,7 +82,8 @@ document.getElementById("toy-collection").addEventListener("click", (e) => {
     let currentLikes = parseInt(e.target.previousElementSibling.innerText)
     let newLikes = currentLikes + 1
     e.target.previousElementSibling.innerText = newLikes + "likes"
-    fetch(`http://localhost:3000/toys/${e.target.dataset.id}`, {
+    console.log(e.target.id)
+    fetch(`http://localhost:3000/toys/${e.target.id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
